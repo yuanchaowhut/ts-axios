@@ -1,6 +1,4 @@
-import { isFormData, isPlainObject } from './util'
-import { head } from 'shelljs'
-import { debug } from 'util'
+import { isPlainObject } from './util'
 
 /**
  * 规范headerName，如：content-type 转换为 Content-Type.
@@ -28,4 +26,21 @@ export function processHeaders(headers: any, data: any): any {
   }
 
   return headers
+}
+
+export function parseHeaders(headers: string): any {
+  const parsed = Object.create(null)
+  if (!headers) {
+    return parsed
+  }
+  headers.split('\r\n').forEach(line => {
+    let [key, val] = line.split(':')
+    key = key.trim().toLowerCase()
+    if (!key) {
+      return
+    }
+    parsed[key] = val.trim()
+  })
+
+  return parsed
 }
