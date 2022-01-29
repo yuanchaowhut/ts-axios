@@ -5,6 +5,7 @@ import { flattenHeaders } from '../helpers/headers'
 import transform from './transform'
 
 export default function dispatchRequest(config: AxiosRequestConfig): AxiosPromise {
+  throwIfCancellationRequested(config)
   processConfig(config)
   return xhr(config).then(res => {
     return transformResponseData(res)
@@ -41,4 +42,11 @@ function transformResponseData(res: AxiosResponse): AxiosResponse {
   // res.data = transformResponse(res.data)
   res.data = transform(res.data, res.headers, res.config.transformResponse)
   return res
+}
+
+/**
+ * 判断cancelToken是不是已经执行过一次，已经使用过一次的cancelToken不能再使用，请求发不出去
+ */
+function throwIfCancellationRequested(config: AxiosRequestConfig): void {
+  config.cancelToken?.throwIfRequested()
 }
