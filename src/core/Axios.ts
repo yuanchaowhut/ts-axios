@@ -8,6 +8,7 @@ import {
 } from '../types'
 import dispatchRequest from './dispatchRequest'
 import InterceptorManager from '../types/interceptorManager'
+import mergeConfig from './mergeConfig'
 
 interface Interceptors {
   request: InterceptorManager<AxiosRequestConfig>
@@ -31,8 +32,8 @@ export default class Axios {
     }
   }
 
-  // 兼容重载函数
   request(url: any, config?: any): AxiosPromise {
+    // 兼容重载函数
     if (typeof url === 'string') {
       if (!config) {
         config = {}
@@ -57,6 +58,10 @@ export default class Axios {
     this.interceptors.response.forEach(interceptor => {
       chain.push(interceptor)
     })
+
+    // 合并配置
+    config = mergeConfig(this.defaults, config)
+    config.method = config.method.toLowerCase()
 
     // 利用promise组织拦截器(包括真正的请求)链式调用
     let promise = Promise.resolve(config)
