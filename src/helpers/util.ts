@@ -8,8 +8,9 @@ export function isPlainObject(val: any): val is Object {
   return getType.call(val) === '[object Object]'
 }
 
-export function isFormData(val: any): val is Object {
-  return getType.call(val) === '[object FormData]'
+export function isFormData(val: any): val is FormData {
+  // return getType.call(val) === '[object FormData]'
+  return val !== undefined && val instanceof FormData
 }
 
 export function extend<T, U>(to: T, from: U): T & U {
