@@ -1,4 +1,4 @@
-import axios, { AxiosError } from '../../src/index'
+import axios from '../../src/index'
 
 document.cookie = 'a=b'
 

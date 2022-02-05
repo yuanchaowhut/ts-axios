@@ -1,10 +1,15 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
+const multipart = require('connect-multiparty')
+const atob = require('atob')
 const webpack = require('webpack')
 const webpackDevMiddleware = require('webpack-dev-middleware')
 const webpackHotMiddleware = require('webpack-hot-middleware')
 const WebpackConfig = require('./webpack.config')
+const path = require('path')
+
+require('./server2')
 
 const app = express()
 const compiler = webpack(WebpackConfig)
@@ -23,11 +28,22 @@ app.use(webpackHotMiddleware(compiler))
 
 //设置静态资源目录，__dirname这是指的是examples目录.但浏览器中访问时不需要带examples，
 // http://localhost:8080/simple/index.html 就相当于访问的是examples/simple/index.html
-app.use(express.static(__dirname))
+app.use(
+  express.static(__dirname, {
+    setHeaders(res) {
+      res.cookie('XSRF-TOKEN-D', '1234abc')
+    }
+  })
+)
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
+app.use(
+  multipart({
+    uploadDir: path.resolve(__dirname, 'upload')
+  })
+)
 
 const router = express.Router()
 

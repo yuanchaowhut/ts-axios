@@ -30,6 +30,4 @@ router.options('/more/server2', function(req, res) {
 app.use(router)
 
 const port = 8088
-module.exports = app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}, Ctrl+C to stop`)
-})
+module.exports = app.listen(port)
