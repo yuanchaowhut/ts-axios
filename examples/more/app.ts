@@ -1,12 +1,32 @@
 import axios from '../../src/index'
 
-document.cookie = 'a=b'
+function getA() {
+  return axios.get('/more/A')
+}
 
-const instance = axios.create({
-  xsrfCookieName: 'XSRF-TOKEN-D',
-  xsrfHeaderName: 'X-XSRF-TOKEN-D'
+function getB() {
+  return axios.get('/more/B')
+}
+
+axios.all([getA(), getB()]).then(
+  axios.spread(function(resA, resB) {
+    console.log(resA.data)
+    console.log(resB.data)
+  })
+)
+
+axios.all([getA(), getB()]).then(([resA, resB]) => {
+  console.log(resA.data)
+  console.log(resB.data)
 })
 
-instance.get('/more/get').then(res => {
-  console.log(res)
-})
+const fakeConfig = {
+  baseURL: 'https://www.baidu.com/',
+  url: '/user/12345',
+  params: {
+    idClient: 1,
+    idTest: 2,
+    testString: 'thisIsATest'
+  }
+}
+console.log(axios.getUri(fakeConfig))
