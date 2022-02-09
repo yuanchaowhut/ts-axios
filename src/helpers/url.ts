@@ -1,4 +1,4 @@
-import { isDate, isPlainObject } from './util'
+import { isDate, isPlainObject, isURLSearchParams } from './util'
 
 interface URLOrigin {
   protocol: string
@@ -17,35 +17,47 @@ export function encode(val: string): string {
     .replace(/%5D/gi, ']')
 }
 
-export function buildURL(url: string, params?: any): string {
+export function buildURL(
+  url: string,
+  params?: any,
+  paramsSerializer?: (params: any) => string
+): string {
   if (!params) {
     return url
   }
-  const parts: string[] = [] // ["name=tom", "age=18"]
-  Object.keys(params).forEach(key => {
-    const val = params[key]
-    // 丢弃空值，forEach里的return并不能终止遍历，它相当于for循环中的continue
-    if (val === null || typeof val === 'undefined') {
-      return
-    }
-
-    // 数组和非数组统一放到一个数组中，便于统一管理
-    let values = []
-    if (Array.isArray(val)) {
-      key += '[]' // foo[]=bar1&foo[]=bar2
-      values = val
-    } else {
-      values = [val]
-    }
-    values.forEach(val => {
-      if (isDate(val)) {
-        val = val.toISOString()
-      } else if (isPlainObject(val)) {
-        val = JSON.stringify(val)
+  let serializedParams = null
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params)
+  } else if (isURLSearchParams(params)) {
+    serializedParams = params.toString()
+  } else {
+    const parts: string[] = [] // ["name=tom", "age=18"]
+    Object.keys(params).forEach(key => {
+      const val = params[key]
+      // 丢弃空值，forEach里的return并不能终止遍历，它相当于for循环中的continue
+      if (val === null || typeof val === 'undefined') {
+        return
       }
-      parts.push(`${encode(key)}=${encode(val)}`)
+
+      // 数组和非数组统一放到一个数组中，便于统一管理
+      let values = []
+      if (Array.isArray(val)) {
+        key += '[]' // foo[]=bar1&foo[]=bar2
+        values = val
+      } else {
+        values = [val]
+      }
+      values.forEach(val => {
+        if (isDate(val)) {
+          val = val.toISOString()
+        } else if (isPlainObject(val)) {
+          val = JSON.stringify(val)
+        }
+        parts.push(`${encode(key)}=${encode(val)}`)
+      })
     })
-  })
+    serializedParams = parts.join('&')
+  }
 
   // url中不能带hash
   const markIndex = url.indexOf('#')
@@ -54,9 +66,8 @@ export function buildURL(url: string, params?: any): string {
   }
 
   // 拼接参数
-  const paramStr = parts.join('&')
-  if (paramStr) {
-    url += (url.indexOf('?') === -1 ? '?' : '&') + paramStr
+  if (serializedParams) {
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams
   }
 
   return url
@@ -78,4 +89,12 @@ function resolveURL(url: string): URLOrigin {
 export function isURLSameOrigin(requestURL: string): boolean {
   const origin = resolveURL(requestURL)
   return origin.protocol === currentOrigin.protocol && origin.host === currentOrigin.host
+}
+
+export function isAbsoluteURL(url: string): boolean {
+  return /(^[a-z][a-z\d\+\-\.]*:)?\/\//i.test(url)
+}
+
+export function combineURL(baseURL: string, relativeURL?: string): string {
+  return relativeURL ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') : baseURL
 }
