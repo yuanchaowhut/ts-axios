@@ -9,11 +9,11 @@ export function transformRequest(data: any): any {
 }
 
 export function transformResponse(data: any): any {
-  if (typeof data === 'string' && (data.indexOf('{') !== -1 || data.indexOf('[') !== -1)) {
+  if (typeof data === 'string') {
     try {
       data = JSON.parse(data)
     } catch (e) {
-      console.log(e)
+      // console.log(e)
     }
   }
 

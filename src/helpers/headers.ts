@@ -35,12 +35,12 @@ export function parseHeaders(headers: string): any {
     return parsed
   }
   headers.split('\r\n').forEach(line => {
-    let [key, val] = line.split(':')
+    let [key, ...vals] = line.split(':') // Date: Tue, 21 May 2019 09:23:44 GMT\r\n
     key = key.trim().toLowerCase()
     if (!key) {
       return
     }
-    parsed[key] = val.trim()
+    parsed[key] = vals.join(':').trim()
   })
 
   return parsed

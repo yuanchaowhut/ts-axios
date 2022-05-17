@@ -11,7 +11,7 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
       url,
       method = 'get',
       data,
-      headers,
+      headers = {},
       responseType,
       timeout,
       cancelToken,
@@ -61,7 +61,7 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
         }
         const responseHeaders = parseHeaders(request.getAllResponseHeaders())
         const responseData =
-          request.responseType !== 'text' ? request.response : request.responseText
+          responseType && responseType !== 'text' ? request.response : request.responseText
         const response: AxiosResponse = {
           data: responseData,
           status: request.status,
@@ -136,7 +136,7 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
       } else {
         reject(
           createError(
-            `Request failed width status code ${response.status}`,
+            `Request failed with status code ${response.status}`,
             config,
             null,
             request,

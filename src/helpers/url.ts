@@ -22,6 +22,11 @@ export function buildURL(
   params?: any,
   paramsSerializer?: (params: any) => string
 ): string {
+  // 去除url中可能存在的hash
+  const markIndex = url.indexOf('#')
+  if (markIndex !== -1) {
+    url = url.slice(0, markIndex)
+  }
   if (!params) {
     return url
   }
@@ -59,12 +64,6 @@ export function buildURL(
     serializedParams = parts.join('&')
   }
 
-  // url中不能带hash
-  const markIndex = url.indexOf('#')
-  if (markIndex !== -1) {
-    url = url.slice(0, markIndex)
-  }
-
   // 拼接参数
   if (serializedParams) {
     url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams
@@ -92,7 +91,7 @@ export function isURLSameOrigin(requestURL: string): boolean {
 }
 
 export function isAbsoluteURL(url: string): boolean {
-  return /(^[a-z][a-z\d\+\-\.]*:)?\/\//i.test(url)
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url)
 }
 
 export function combineURL(baseURL: string, relativeURL?: string): string {
